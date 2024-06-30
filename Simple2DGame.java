@@ -15,6 +15,8 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
     private int score = 0;
     private ArrayList<Rectangle> blueSquares;
     private ArrayList<Rectangle> orangeDots;
+    private Rectangle purpleBlock;
+    private int purpleBlockSpeed = 2;
     private Random random;
 
     public Simple2DGame() {
@@ -27,6 +29,7 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
         blueSquares = new ArrayList<>();
         orangeDots = new ArrayList<>();
         random = new Random();
+        purpleBlock = new Rectangle(random.nextInt(750), random.nextInt(550), 30, 30);
         setFocusable(true);
         addKeyListener(this);
         generateSquaresAndDots();
@@ -57,6 +60,9 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
             g.fillRect(orangeDot.x, orangeDot.y, orangeDot.width, orangeDot.height);
         }
 
+        g.setColor(Color.MAGENTA);
+        g.fillRect(purpleBlock.x, purpleBlock.y, purpleBlock.width, purpleBlock.height);
+
         g.setColor(Color.BLACK);
         g.drawString("Score: " + score, 10, 10);
     }
@@ -66,20 +72,33 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
         playerX += xVelocity;
         playerY += yVelocity;
         moveOrangeDots();
+        movePurpleBlock();
         checkCollisions();
         repaint();
     }
 
     private void moveOrangeDots() {
         for (Rectangle orangeDot : orangeDots) {
-            orangeDot.x += random.nextInt(11) - 5; // Move randomly between -5 and 5
-            orangeDot.y += random.nextInt(11) - 5; // Move randomly between -5 and 5
+            orangeDot.x += SPEED;
+            orangeDot.y += SPEED;
 
-            // Keep dots within bounds
-            if (orangeDot.x < 0) orangeDot.x = 0;
-            if (orangeDot.x > getWidth() - 20) orangeDot.x = getWidth() - 20;
-            if (orangeDot.y < 0) orangeDot.y = 0;
-            if (orangeDot.y > getHeight() - 20) orangeDot.y = getHeight() - 20;
+            // Bounce off walls
+            if (orangeDot.x < 0 || orangeDot.x > getWidth() - 20) SPEED = -SPEED;
+            if (orangeDot.y < 0 || orangeDot.y > getHeight() - 20) SPEED = -SPEED;
+        }
+    }
+
+    private void movePurpleBlock() {
+        if (playerX < purpleBlock.x) {
+            purpleBlock.x -= purpleBlockSpeed;
+        } else if (playerX > purpleBlock.x) {
+            purpleBlock.x += purpleBlockSpeed;
+        }
+
+        if (playerY < purpleBlock.y) {
+            purpleBlock.y -= purpleBlockSpeed;
+        } else if (playerY > purpleBlock.y) {
+            purpleBlock.y += purpleBlockSpeed;
         }
     }
 
@@ -98,6 +117,11 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
                 generateSquaresAndDots(); // Reset the level
                 break;
             }
+        }
+
+        if (new Rectangle(playerX, playerY, 50, 50).intersects(purpleBlock)) {
+            score -= 5;
+            if (score < 0) score = 0;
         }
 
         if (blueSquares.isEmpty()) {
