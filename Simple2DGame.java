@@ -15,6 +15,7 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
     private int score = 0;
     private ArrayList<Rectangle> blueSquares;
     private ArrayList<Rectangle> orangeDots;
+    private ArrayList<Point> orangeDotsDirections; // To store the directions of orange dots
     private Rectangle purpleBlock;
     private int purpleBlockSpeed = 2;
     private Random random;
@@ -28,6 +29,7 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
         yVelocity = 0;
         blueSquares = new ArrayList<>();
         orangeDots = new ArrayList<>();
+        orangeDotsDirections = new ArrayList<>(); // Initialize directions list
         random = new Random();
         purpleBlock = new Rectangle(random.nextInt(750), random.nextInt(550), 30, 30);
         setFocusable(true);
@@ -38,9 +40,11 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
     private void generateSquaresAndDots() {
         blueSquares.clear();
         orangeDots.clear();
+        orangeDotsDirections.clear(); // Clear directions list
         for (int i = 0; i < 5; i++) {
             blueSquares.add(new Rectangle(random.nextInt(750), random.nextInt(550), 20, 20));
             orangeDots.add(new Rectangle(random.nextInt(750), random.nextInt(550), 20, 20));
+            orangeDotsDirections.add(new Point(1, 1)); // Initialize directions to (1,1)
         }
     }
 
@@ -78,13 +82,22 @@ public class Simple2DGame extends JPanel implements ActionListener, KeyListener 
     }
 
     private void moveOrangeDots() {
-        for (Rectangle orangeDot : orangeDots) {
-            orangeDot.x += SPEED;
-            orangeDot.y += SPEED;
+        for (int i = 0; i < orangeDots.size(); i++) {
+            Rectangle orangeDot = orangeDots.get(i);
+            Point direction = orangeDotsDirections.get(i);
+
+            orangeDot.x += direction.x * SPEED;
+            orangeDot.y += direction.y * SPEED;
 
             // Bounce off walls
-            if (orangeDot.x < 0 || orangeDot.x > getWidth() - 20) SPEED = -SPEED;
-            if (orangeDot.y < 0 || orangeDot.y > getHeight() - 20) SPEED = -SPEED;
+            if (orangeDot.x < 0 || orangeDot.x > getWidth() - 20) {
+                direction.x = -direction.x;
+            }
+            if (orangeDot.y < 0 || orangeDot.y > getHeight() - 20) {
+                direction.y = -direction.y;
+            }
+
+            orangeDotsDirections.set(i, direction);
         }
     }
 
